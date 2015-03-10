@@ -50,7 +50,9 @@ public class WharfConnClient {
 	public void close(){
 		if(transport != null){
 			transport.close();
+			transport = null;
 		}
+		client = null;
 	}
 
 	public boolean ping() throws Exception {
@@ -61,6 +63,7 @@ public class WharfConnClient {
 			return client.ping();
 		} catch (TException e) {
 			e.printStackTrace();
+			close();
 			return false;
 		}
 	}

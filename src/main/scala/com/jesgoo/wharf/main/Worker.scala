@@ -47,5 +47,11 @@ object Worker {
         e.printStackTrace()
         System.exit(context.WORK_INIT_DRIVERS_ERROR)
       }
+      while (true){
+           if(hello_client != null ){
+             hello_client.ping()
+           }
+           Thread.sleep(2000)
+      }
     }
 }

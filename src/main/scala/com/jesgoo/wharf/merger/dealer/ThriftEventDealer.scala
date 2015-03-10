@@ -47,7 +47,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
     }
   }
 
-  def setPusher(p: Puller) {
+  def setPuller(p: Puller) {
     if (puller == null) {
       puller = p
     }
@@ -58,7 +58,6 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
     for (i <- 0 to data.size() - 1) {
       val d = data.get(i)
       val tmp_md5 = Utils.md5(d.rel)
-      LOG.debug("ThriftEventDealer check md5 ; src_md5=", d.md5," dest_md5=",tmp_md5," data=",d.rel)
       if (tmp_md5 != d.md5) {
         LOG.error("ThriftEventDealer check md5 fail; src_md5=", d.md5," dest_md5=",tmp_md5," data=",d.rel)
         false
@@ -71,7 +70,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
     if (event == null) {
       false
     }
-    LOG.debug("ThriftEventDealer get a event is=", event.getId)
+    LOG.debug("ThriftEventDealer get a event is=", event.getId,"eventIds cache size=",String.valueOf(eventIdsM.length()))
     if (event.getHead.getType == EventType.SIGN2) {
       eventIdsM.remove(event.getId)
       true

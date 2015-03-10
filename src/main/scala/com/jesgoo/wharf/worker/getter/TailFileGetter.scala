@@ -39,10 +39,10 @@ class TailFileGetter(file : String) extends Getter{
       var tmpstr =""
       while(it.hasNext){
         tmpstr = it.next()
-        LOG.debug("TailFileGetter: get data is ",tmpstr)
+        //LOG.debug("TailFileGetter: get data is ",tmpstr)
         val data = new Data(tmpstr)
         data.setFilename(name)
-        LOG.debug("TailFileGetter: put data to Hamal; data = ",data.toString())
+        //LOG.debug("TailFileGetter: put data to Hamal; data = ",data.toString())
         hamal.in(data)
       }
     }

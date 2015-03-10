@@ -32,7 +32,6 @@ public class WharfDataServer {
 			tnbSocketTransport = new TNonblockingServerSocket(server_port);
 			TNonblockingServer.Args tnbArgs = new TNonblockingServer.Args(
 					tnbSocketTransport);
-
 			tnbArgs.processor(tprocessor);
 			tnbArgs.transportFactory(new TFramedTransport.Factory());
 			tnbArgs.protocolFactory(new TCompactProtocol.Factory());

@@ -12,7 +12,7 @@ class DealerManager{
     try{
       val dealer = new ThriftEventDealer(port)
       val pull = new FilePuller()
-      dealer.setPusher(pull)
+      dealer.setPuller(pull)
       new Thread(pull).start()
       Thread.sleep(1000)
       new Thread(dealer).start()

@@ -47,7 +47,7 @@ class StoreHamal(NAME: String) extends Hamal {
     if (file_path.exists()) {
       for (file <- file_path.list()) {
         if (file.contains(NAME)) {
-          LOG.debug("Store Hamal load ",file)
+          //LOG.debug("Store Hamal load ",file)
           id_map += (file -> true)
           event_ids += (file)
         }
@@ -88,7 +88,7 @@ class StoreHamal(NAME: String) extends Hamal {
     var starttime = System.currentTimeMillis()
     init_id_map
     while (true) {
-      LOG.debug("Store Hamal has running name=",NAME)
+      //LOG.debug("Store Hamal has running name=",NAME)
       val interval_time = System.currentTimeMillis() - starttime
       if (cur_lines > hamal_limit_lines || (interval_time > hamal_limit_timeout && cur_lines > 0)) {
         LOG.debug("Store Hamal to now to close file :curline= ",String.valueOf(cur_lines),
@@ -135,7 +135,7 @@ class StoreHamal(NAME: String) extends Hamal {
       return null
     }
     var get_id: String = event_ids.dequeue()
-    LOG.debug("Store Hamal event_ids dequeue a key ",get_id)
+    //LOG.debug("Store Hamal event_ids dequeue a key ",get_id)
     while (id_map.get(get_id).get != true) {
       id_map -= (get_id)
       if (event_ids.size == 0) {
@@ -144,7 +144,7 @@ class StoreHamal(NAME: String) extends Hamal {
       get_id = event_ids.dequeue()
     }
     val content_list = new ArrayList[Content]()
-    LOG.debug("Store Hamal get eventid=",get_id)
+    //LOG.debug("Store Hamal get eventid=",get_id)
     val lines = Source.fromFile(cur_path + "/" + get_id).getLines
     var line = ""
     var md5 = ""

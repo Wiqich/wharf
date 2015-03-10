@@ -57,6 +57,7 @@ public class WharfDataClient {
 			return client.ping();
 		} catch (TException e) {
 			e.printStackTrace();
+			close();
 			return false;
 		}
 	}
@@ -64,7 +65,9 @@ public class WharfDataClient {
 	public void close(){
 		if(transport != null){
 			transport.close();
+			transport = null;
 		}
+		client = null;
 	}
 	
 	public boolean push(Event ev) throws TTransportException {

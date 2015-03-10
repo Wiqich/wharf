@@ -17,7 +17,7 @@ object Merger {
       val dealerM = new DealerManager
       
       val helloServer = new ThriftHelloServer(dealerM)
-      new Thread(helloServer).start()
+      helloServer.run()
       LOG.info("start merger......end")
     }
 }

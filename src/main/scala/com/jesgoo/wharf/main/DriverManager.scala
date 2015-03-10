@@ -33,7 +33,7 @@ class DriverManager {
       LOG.debug(tmpline)
 
       val res = Worker.hello_client.hello(new Request(Worker.hostname, System.currentTimeMillis(), tmpline))
-
+      LOG.debug("BOBO get port=",String.valueOf(res.port))
       if (res == null) {
         LOG.error("Response is null")
         throw new NullPointerException("Response is null")
@@ -52,7 +52,7 @@ class DriverManager {
         p.setHamal(h)
         val d = new Driver(Worker.hostname + "_" + tmpline)
         d.init(g, h, p)
-        LOG.debug("Driver init success and add into DriverManager")
+        LOG.debug("Driver init "+tmpline+" success and add into DriverManager")
         addDriver(d)
       }
     }

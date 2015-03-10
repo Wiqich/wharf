@@ -11,7 +11,7 @@ import com.jesgoo.wharf.thrift.wharfconn.WharfConnService
 import com.jesgoo.wharf.core.server.WharfConnServer
 import com.jesgoo.wharf.core.config.LOG
 
-class ThriftHelloServer(dealerM: DealerManager) extends WharfConnService.Iface with Runnable {
+class ThriftHelloServer(dealerM: DealerManager) extends WharfConnService.Iface{
 
   val host_map = new HashMap[String, Host]
   val port_set = new HashSet[Int]

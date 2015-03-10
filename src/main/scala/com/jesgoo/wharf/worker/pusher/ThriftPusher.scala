@@ -57,7 +57,7 @@ class ThriftPusher(port: Int) extends Pusher {
               LOG.error("Thrift pusher push deleteevent to collector fail ; id = ",evt.getId) 
            }
         }
-      })
+      }).start()
       true
     } else {
       LOG.error("Thrift pusher push event to collector; result = fail") 
