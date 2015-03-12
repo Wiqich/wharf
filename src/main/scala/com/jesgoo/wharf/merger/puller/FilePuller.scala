@@ -86,6 +86,7 @@ class FilePuller extends Puller{
   
   def stop(){
     closeWriter
+    this.stop()
   }
   
   def run(){

@@ -1,13 +1,15 @@
 package com.jesgoo.wharf.main
 
 import scala.collection.mutable.HashMap
+
+import org.apache.log4j.Logger
+
+import com.jesgoo.wharf.core.client.WharfConnClient
+import com.jesgoo.wharf.core.config.LOG
+import com.jesgoo.wharf.thrift.wharfconn.Request
 import com.jesgoo.wharf.worker.getter.TailFileGetter
 import com.jesgoo.wharf.worker.hamal.StoreHamal
 import com.jesgoo.wharf.worker.pusher.ThriftPusher
-import com.jesgoo.wharf.core.client.WharfConnClient
-import com.jesgoo.wharf.thrift.wharfconn.Request
-import com.jesgoo.wharf.core.config.LOG
-import org.apache.log4j.Logger
 
 class DriverManager {
 
@@ -56,6 +58,7 @@ class DriverManager {
         d.init(g, h, p)
         LOG.debug(logger,"Driver init "+tmpline+" success and add into DriverManager")
         addDriver(d)
+        LOG.info(logger,"Worker init success=",tmpline)
       }
     }
   }

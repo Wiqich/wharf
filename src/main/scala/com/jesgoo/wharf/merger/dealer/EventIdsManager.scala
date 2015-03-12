@@ -12,6 +12,7 @@ class EventIdsManager extends Runnable{
   val period : Long = Merger.context.EVENT_ID_MANAGER_CLEAR_PERIOD
   
   val size : Long = Merger.context.EVENT_ID_MANAGER_CLEAR_SIZE
+  var isRun = false;
   
   def putdata(id:String,time:Long) = id_map.put(id, time)
     
@@ -37,11 +38,13 @@ class EventIdsManager extends Runnable{
   }
   
   def stop(){
+     isRun =false
      clearAll
   }
   
   def run(){
-    while(true){
+    isRun =true;
+    while(isRun){
       if(id_map.size() > size){
           clear()
       }
