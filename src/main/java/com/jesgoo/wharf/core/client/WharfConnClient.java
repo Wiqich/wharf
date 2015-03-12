@@ -3,7 +3,6 @@ package com.jesgoo.wharf.core.client;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 
@@ -41,8 +40,7 @@ public class WharfConnClient {
 	}
 	TTransport transport = null;
 	private void init() throws Exception {
-	    transport = new TFramedTransport(new TSocket(host,
-				server_port, timeout));
+		transport = new TSocket(host,server_port, timeout);
 		TProtocol protocol = new TCompactProtocol(transport);
 		client = new WharfConnService.Client(protocol);
 		transport.open();

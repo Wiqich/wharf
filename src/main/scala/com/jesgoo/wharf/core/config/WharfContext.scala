@@ -14,8 +14,6 @@ class WharfContext(config:WharfConf) {
   val EVENT_ID_MANAGER_CLEAR_PERIOD : Long = config.getLong("merger.eidmng.clear.period", 600000)
   val EVENT_ID_MANAGER_CLEAR_SIZE : Long = config.getLong("merger.eidmng.clear.size", 100)
   
-  val LOG_LEVEL :String = config.get("log.level", "info")
-  
   //filepuller
   val FILE_PULLER_FILEPATH = config.get("merger.filepuller.filepath", "/tmp/logs")
   val FILE_PULLER_TOLL_TYPE = config.get("merger.filepuller.roll.type", "hourly")

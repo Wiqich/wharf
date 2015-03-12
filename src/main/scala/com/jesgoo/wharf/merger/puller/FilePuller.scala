@@ -9,6 +9,8 @@ import com.jesgoo.wharf.core.config.Utils
 import com.jesgoo.wharf.thrift.wharfdata.Content
 import java.util.List
 import com.jesgoo.wharf.core.config.LOG
+import java.io.FileWriter
+import org.apache.log4j.Logger
 
 class FilePuller extends Puller{
   
@@ -21,6 +23,7 @@ class FilePuller extends Puller{
   var cur_name = ""
   var file_time_name : String = ""
   var writer: PrintWriter = null  
+  val logger = Logger.getLogger(getClass.getName)
   
   def openWriter(evt:Event){
     if(cur_path == ""){
@@ -31,8 +34,9 @@ class FilePuller extends Puller{
       file.mkdirs()
     }
     cur_name = evt.getHead.getFilename
-    LOG.debug("Puller file is",cur_name," path is",cur_path)
-    writer = new PrintWriter(new File(cur_path + "/" + cur_name))
+    LOG.debug(logger,"Puller file is",cur_name," path is",cur_path)
+    val op_file = new FileWriter(cur_path + "/" + cur_name, true)
+    writer = new PrintWriter(op_file)
   }  
   
   def flush(){
@@ -72,7 +76,7 @@ class FilePuller extends Puller{
       openWriter(evt)
     }
     val l_data : List[Content] = evt.body.getContents()
-    LOG.debug("FilePuller put some data to=",cur_name," data length=",String.valueOf(l_data.size()))
+    LOG.debug(logger,"FilePuller put some data to=",cur_name," data length=",String.valueOf(l_data.size()))
     for(i <- 0 to l_data.size()-1){
       writer.append(l_data.get(i).getRel+"\n")
     }

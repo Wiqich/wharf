@@ -4,13 +4,14 @@ import com.jesgoo.wharf.core.Data
 import com.jesgoo.wharf.worker.hamal.Hamal
 import scala.sys.process._
 import com.jesgoo.wharf.core.config.LOG
+import org.apache.log4j.Logger
 
 class TailFileGetter(file : String) extends Getter{
   private var hamal : Hamal = null
   private val cmd = Seq("tail","-n 0","-F",file)
   private var it : Iterator[String] = null
   private val name = file.substring(file.lastIndexOf("/")+1);
-  
+  val logger = Logger.getLogger(getClass.getName)
   def setHamal(hamal : Hamal) {
     this.hamal = hamal
   }
@@ -22,16 +23,16 @@ class TailFileGetter(file : String) extends Getter{
     }catch {
       case e:Exception =>
       e.printStackTrace()
-      LOG.error("TailFileGetter:file ",file,e.getMessage)
+      LOG.error(logger,"TailFileGetter:file ",file,e.getMessage)
       it = null
     }
     
   }
   def run(){
-    LOG.debug("TailFileGetter start with filename ",file)
+    LOG.debug(logger,"TailFileGetter start with filename ",file)
     init()
     while(it == null){
-      LOG.error("TailFileGetter:file not init ok reinit , sleep 10s")
+      LOG.error(logger,"TailFileGetter:file not init ok reinit , sleep 10s")
       init()
       Thread.sleep(5000)
     }

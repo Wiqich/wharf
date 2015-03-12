@@ -5,11 +5,9 @@ import java.io.FileWriter
 import java.io.PrintWriter
 import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
-
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Queue
 import scala.io.Source
-
 import com.jesgoo.wharf.core.Data
 import com.jesgoo.wharf.core.config.LOG
 import com.jesgoo.wharf.core.config.Utils
@@ -19,6 +17,7 @@ import com.jesgoo.wharf.thrift.wharfdata.Content
 import com.jesgoo.wharf.thrift.wharfdata.Event
 import com.jesgoo.wharf.thrift.wharfdata.EventType
 import com.jesgoo.wharf.thrift.wharfdata.Head
+import org.apache.log4j.Logger
 
 class StoreHamal(NAME: String) extends Hamal {
 
@@ -41,7 +40,7 @@ class StoreHamal(NAME: String) extends Hamal {
   val cur_path = Worker.context.STORE_HAMAL_PATH
   var cur_fileName: String = NAME
   var cur_lines = 0
-
+  val logger = Logger.getLogger(getClass.getName)
   def init_id_map() {
     val file_path = new File(cur_path)
     if (file_path.exists()) {
@@ -53,19 +52,19 @@ class StoreHamal(NAME: String) extends Hamal {
         }
       }
     }
-    LOG.info("Store Hamal load finish id_map size " , String.valueOf(id_map.size) , " event_ids size " ,String.valueOf( event_ids.size))
+    LOG.info(logger,"Store Hamal load finish id_map size " , String.valueOf(id_map.size) , " event_ids size " ,String.valueOf( event_ids.size))
   }
 
   def in(data: Data) {
     if (data.getData().trim() != "") {
-      LOG.debug("Hamal in data = ",data.getData())
+      LOG.debug(logger,"Hamal in data = ",data.getData())
       writeLock.lock()
       if (writer == null) {
         openWriter(data)
       }
       writer.write(data.getData() + "\n")
       cur_lines += 1
-      LOG.debug("Hamal writer file ; cur_lines = ", String.valueOf(cur_lines))
+      LOG.debug(logger,"Hamal writer file ; cur_lines = ", String.valueOf(cur_lines))
       flush
       writeLock.unlock()
     }
@@ -74,7 +73,7 @@ class StoreHamal(NAME: String) extends Hamal {
   def flush() {
     if (writer != null) {
       writer.flush()
-      LOG.debug("Hamal writer flush data")
+      LOG.debug(logger,"Hamal writer flush data")
     }
   }
 
@@ -91,7 +90,7 @@ class StoreHamal(NAME: String) extends Hamal {
       //LOG.debug("Store Hamal has running name=",NAME)
       val interval_time = System.currentTimeMillis() - starttime
       if (cur_lines > hamal_limit_lines || (interval_time > hamal_limit_timeout && cur_lines > 0)) {
-        LOG.debug("Store Hamal to now to close file :curline= ",String.valueOf(cur_lines),
+        LOG.debug(logger,"Store Hamal to now to close file :curline= ",String.valueOf(cur_lines),
             " interval_time= ",String.valueOf(interval_time)," limits = ",
             String.valueOf(hamal_limit_lines),";",String.valueOf(hamal_limit_timeout))
         writeLock.lock()
@@ -115,13 +114,13 @@ class StoreHamal(NAME: String) extends Hamal {
     
     val op_file = new FileWriter(cur_path + "/" + cur_name, true)
     writer = new PrintWriter(op_file)
-    LOG.debug("Hamal open file = "+cur_path + "/" + cur_name)
+    LOG.debug(logger,"Hamal open file = "+cur_path + "/" + cur_name)
     
   }
 
   def closeWriter() {
     flush
-    LOG.debug("Store Hamal close writer file: ",cur_name)
+    LOG.debug(logger,"Store Hamal close writer file: ",cur_name)
     if (writer != null) {
       writer.close()
     }
@@ -167,10 +166,10 @@ class StoreHamal(NAME: String) extends Hamal {
     id_map.-=(key)
     val tmp_file = new File(cur_path + "/" + key)
     if (tmp_file.exists()) {
-      LOG.debug("Hamal delete the file : ",tmp_file.getName) 
+      LOG.debug(logger,"Hamal delete the file : ",tmp_file.getName) 
       tmp_file.delete()
     }else{
-      LOG.error("Hamal delete the file : ",tmp_file.getName," is not exsit") 
+      LOG.error(logger,"Hamal delete the file : ",tmp_file.getName," is not exsit") 
     }
   }
 

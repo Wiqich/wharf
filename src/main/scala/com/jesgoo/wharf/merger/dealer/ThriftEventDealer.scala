@@ -9,6 +9,7 @@ import com.jesgoo.wharf.thrift.wharfdata.Event
 import com.jesgoo.wharf.thrift.wharfdata.WharfDataService
 import com.jesgoo.wharf.thrift.wharfdata.EventType
 import com.jesgoo.wharf.core.config.LOG
+import org.apache.log4j.Logger
 
 class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
 
@@ -18,7 +19,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
   var puller_thread: Thread = null
 
   val eventIdsM = new EventIdsManager
-
+  val logger = Logger.getLogger(getClass.getName)
   def init() {
     if (wharfDataServer != null) {
       wharfDataServer.close()
@@ -59,7 +60,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
       val d = data.get(i)
       val tmp_md5 = Utils.md5(d.rel)
       if (tmp_md5 != d.md5) {
-        LOG.error("ThriftEventDealer check md5 fail; src_md5=", d.md5," dest_md5=",tmp_md5," data=",d.rel)
+        LOG.error(logger,"ThriftEventDealer check md5 fail; src_md5=", d.md5," dest_md5=",tmp_md5," data=",d.rel)
         false
       }
     }
@@ -70,7 +71,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
     if (event == null) {
       false
     }
-    LOG.debug("ThriftEventDealer get a event is=", event.getId,"eventIds cache size=",String.valueOf(eventIdsM.length()))
+    LOG.debug(logger,"ThriftEventDealer get a event is=", event.getId,"eventIds cache size=",String.valueOf(eventIdsM.length()))
     if (event.getHead.getType == EventType.SIGN2) {
       eventIdsM.remove(event.getId)
       true

@@ -2,17 +2,16 @@ package com.jesgoo.wharf.core.server;
 
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TServerSocket;
 
 import com.jesgoo.wharf.thrift.wharfdata.WharfDataService;
 
 public class WharfDataServer {
 	private int server_port;
 	private TServer server;
-
+    private int maxWorker = 5;
 	public static void main(String[] args) {
 		// TProcessor tprocessor = new WharfDataService.Processor<Iface>(
 		// new WharfDataImpl());
@@ -22,21 +21,27 @@ public class WharfDataServer {
 
 	TProcessor tprocessor = null;
 
+	public WharfDataServer(int port,int maxWorker) {
+		this.server_port = port;
+		this.maxWorker = maxWorker;
+	}
 	public WharfDataServer(int port) {
 		this.server_port = port;
 	}
 
 	public void init() {
-		TNonblockingServerSocket tnbSocketTransport;
+		TServerSocket serverTransport;
 		try {
-			tnbSocketTransport = new TNonblockingServerSocket(server_port);
-			TNonblockingServer.Args tnbArgs = new TNonblockingServer.Args(
-					tnbSocketTransport);
-			tnbArgs.processor(tprocessor);
-			tnbArgs.transportFactory(new TFramedTransport.Factory());
-			tnbArgs.protocolFactory(new TCompactProtocol.Factory());
 
-			server = new TNonblockingServer(tnbArgs);
+			serverTransport = new TServerSocket(server_port);
+			TThreadPoolServer.Args ttpsArgs = new TThreadPoolServer.Args(
+					serverTransport);
+			ttpsArgs.maxWorkerThreads(maxWorker);
+			ttpsArgs.processor(tprocessor);
+			ttpsArgs.protocolFactory(new TCompactProtocol.Factory());
+			server = new TThreadPoolServer(ttpsArgs);
+			server.serve();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,45 +1,38 @@
 package com.jesgoo.wharf.core.config
 
 import java.text.SimpleDateFormat
+import org.apache.log4j.Logger
 
 object LOG {
-  var LEVEL = 1
-  val logFormat = new SimpleDateFormat("[ yyyy-MM-dd HH:mm:ss_SS ]")
 
-  def info(log: String*) {
+  def info(logger :Logger , log: String*) {
     val str = new StringBuilder
-    str.append("[INFO] ").append(logFormat.format(Utils.format_time(System.currentTimeMillis())))
-    for(tmp <- log){
-      str.append(" ").append(tmp)
+    for (tmp <- log) {
+      str.append(tmp).append(" ")
     }
-    println(str.toString())
+    logger.info(str.toString().trim())
   }
 
-  def debug(log: String*) {
-    if (LEVEL == 2) {
-       val str = new StringBuilder
-       str.append("[DEBUG] ").append(logFormat.format(Utils.format_time(System.currentTimeMillis())))
-       for(tmp <- log){
-          str.append(" ").append(tmp)
-        }
-    println(str.toString())
-    }
-  }
-  
-  def error(log: String*) {
+  def debug(logger :Logger ,log: String*) {
     val str = new StringBuilder
-    str.append("[ERROR] ").append(logFormat.format(Utils.format_time(System.currentTimeMillis())))
-    for(tmp <- log){
-      str.append(" ").append(tmp)
+    for (tmp <- log) {
+      str.append(tmp).append(" ")
     }
-    println(str.toString())
+    logger.debug(str.toString().trim())
   }
-  
-  def setLEVEL(level:String){
-    if(level == "info"){
-      LEVEL=1
-    }else if(level == "debug"){
-      LEVEL=2
+  def error(logger:Logger,log: String*) {
+    val str = new StringBuilder
+    for (tmp <- log) {
+      str.append(tmp).append(" ")
     }
+    logger.error(str.toString().trim())
+  }
+
+  def fatal(logger:Logger,log: String*) {
+    val str = new StringBuilder
+    for (tmp <- log) {
+      str.append(tmp).append(" ")
+    }
+    logger.fatal(str.toString().trim())
   }
 }

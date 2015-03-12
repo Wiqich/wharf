@@ -2,10 +2,9 @@ package com.jesgoo.wharf.core.server;
 
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 
 import com.jesgoo.wharf.thrift.wharfconn.WharfConnService;
@@ -14,7 +13,7 @@ import com.jesgoo.wharf.thrift.wharfconn.WharfConnService.Iface;
 public class WharfConnServer {
 	private int server_port;
 	private TServer server = null;
-
+    private int maxWorker = 20;
 	public static void main(String[] args) {
 		// TProcessor tprocessor = new WharfConnService.Processor<Iface>(
 		// new WharfConnImpl());
@@ -24,6 +23,11 @@ public class WharfConnServer {
 
 	TProcessor tprocessor = null;
 
+	public WharfConnServer(int port,int maxWorker) {
+		this.server_port = port;
+		this.maxWorker = maxWorker;
+	}
+	
 	public WharfConnServer(int port) {
 		this.server_port = port;
 	}
@@ -36,18 +40,16 @@ public class WharfConnServer {
 	}
 
 	public void init() {
-		TNonblockingServerSocket tnbSocketTransport;
+		TServerSocket serverTransport;
 		try {
-			tnbSocketTransport = new TNonblockingServerSocket(server_port);
-
-			TNonblockingServer.Args tnbArgs = new TNonblockingServer.Args(
-					tnbSocketTransport);
-
-			tnbArgs.processor(tprocessor);
-			tnbArgs.transportFactory(new TFramedTransport.Factory());
-			tnbArgs.protocolFactory(new TCompactProtocol.Factory());
-
-			server = new TNonblockingServer(tnbArgs);
+			serverTransport = new TServerSocket(server_port);
+			TThreadPoolServer.Args ttpsArgs = new TThreadPoolServer.Args(
+					serverTransport);
+			ttpsArgs.maxWorkerThreads(maxWorker);
+			ttpsArgs.processor(tprocessor);
+			ttpsArgs.protocolFactory(new TCompactProtocol.Factory());
+			server = new TThreadPoolServer(ttpsArgs);
+			server.serve();
 		} catch (TTransportException e) {
 			e.printStackTrace();
 		}

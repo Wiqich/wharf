@@ -8,6 +8,7 @@ import com.jesgoo.wharf.thrift.wharfdata.EventType
 import com.jesgoo.wharf.thrift.wharfdata.Head
 import com.jesgoo.wharf.thrift.wharfdata.Body
 import com.jesgoo.wharf.core.config.LOG
+import org.apache.log4j.Logger
 
 class ThriftPusher(port: Int) extends Pusher {
 
@@ -18,11 +19,11 @@ class ThriftPusher(port: Int) extends Pusher {
   val pusher_period = Worker.context.THRIFT_PUSHER_PERIOD
   val pusher_host = Worker.context.THRIFT_PUSHER_HOST
   val pusher_timeout = Worker.context.THRIFT_PUSHER_TIMEOUT
-
+  val logger = Logger.getLogger(getClass.getName)
   def init() {
     client = new WharfDataClient(pusher_host, port, pusher_timeout)
     if (!client.ping()) {
-      LOG.error("Thrift pusher helloclient ping false and reinit") 
+      LOG.error(logger,"Thrift pusher helloclient ping false and reinit") 
       client = null
       client = new WharfDataClient(pusher_host, port, pusher_timeout)
     }
@@ -36,31 +37,31 @@ class ThriftPusher(port: Int) extends Pusher {
     if (client == null) {
       this.init()
     }
-    LOG.debug("Thrift pusher push event to collector")
+    LOG.debug(logger,"Thrift pusher push event to collector")
     var result = false
     try{
         result = client.push(evt)
     }catch{
       case e:Exception =>
         e.printStackTrace()
-        LOG.debug("ThriftPusher put event fail")
+        LOG.debug(logger,"ThriftPusher put event fail")
         false
     }
     if (result) {
-      LOG.debug("Thrift pusher push event to collector; result = success") 
+      LOG.debug(logger,"Thrift pusher push event to collector; result = success") 
       this.hamal.sendFinish(evt.id)
       new Thread(new Runnable{
         def run(){
-           LOG.debug("Thrift pusher push event to collector success ; report server to delete") 
+           LOG.debug(logger,"Thrift pusher push event to collector success ; report server to delete") 
            val v = client.push(getDeltedEvent(evt.getId))
            if(!v){
-              LOG.error("Thrift pusher push deleteevent to collector fail ; id = ",evt.getId) 
+              LOG.error(logger,"Thrift pusher push deleteevent to collector fail ; id = ",evt.getId) 
            }
         }
       }).start()
       true
     } else {
-      LOG.error("Thrift pusher push event to collector; result = fail") 
+      LOG.error(logger,"Thrift pusher push event to collector; result = fail") 
       false
     }
   }
@@ -82,7 +83,7 @@ class ThriftPusher(port: Int) extends Pusher {
             client = null
           }
         } else {
-          LOG.debug("Thrift pusher push event to collector success set event = null") 
+          LOG.debug(logger,"Thrift pusher push event to collector success set event = null") 
           evt = null
         }
       }
