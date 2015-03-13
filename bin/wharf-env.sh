@@ -1,9 +1,9 @@
 #!/bin/bash
 
-export JAVA_HOME=
-export SCALA_HOME="/home/yangshunbo/dev/scala-2.11.5"
+export JAVA_HOME="/home/java7u67"
+export SCALA_HOME="/home/scala-2.11.5"
 
 export WHARF_HOME=`cd $(dirname $0)/../; pwd ;`
-export JAVA_HEAP="-Xmx1024m"
+export JAVA_HEAP="2048m"
 
 export WHARF_OPT=

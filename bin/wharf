@@ -26,10 +26,10 @@ fi
 
 if [ "$JAVA_HEAP" == "" ]
 then
-    JAVA_HEAP="-Xmx1024m"
+    JAVA_HEAP="1024m"
 fi
 
-WHARF_OPTS="$JAVA_HEAP $WHARF_OPTS"
+WHARF_OPTS="-J-Xmx$JAVA_HEAP -J-Xms$JAVA_HEAP $WHARF_OPTS"
 
 if [ "$TYPE" == "worker" ]
 then
@@ -46,7 +46,7 @@ for i in `ls $WHARF_HOME/wharf-*-jar-with-dependencies.jar`
 do
     CLASS_PATH=$CLASS_PATH:$i
 done
-CLASS_PATH=$CLASS_PATH:$WHARF_HOME
+CLASS_PATH=$CLASS_PATH:$WHARF_HOME:$WHARF_HOME/conf
 
 #exec $SCALA $WHARF_OPTS -cp $CLASS_PATH $CLASS
-exec $SCALA -J$WHARF_OPTS -DWHARF.CONFIG=$WHARF_HOME/conf -cp $CLASS_PATH $CLASS
+exec $SCALA -J"-Xmx$JAVA_HEAP" -J"-Xms$JAVA_HEAP" -J-server  -DWHARF.CONFIG=$WHARF_HOME/conf -cp $CLASS_PATH $CLASS
