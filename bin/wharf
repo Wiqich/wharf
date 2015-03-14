@@ -46,7 +46,8 @@ for i in `ls $WHARF_HOME/wharf-*-jar-with-dependencies.jar`
 do
     CLASS_PATH=$CLASS_PATH:$i
 done
-CLASS_PATH=$CLASS_PATH:$WHARF_HOME:$WHARF_HOME/conf
+CLASS_PATH=$WHARF_HOME$CLASS_PATH:$WHARF_HOME/conf
 
 #exec $SCALA $WHARF_OPTS -cp $CLASS_PATH $CLASS
-exec $SCALA -J"-Xmx$JAVA_HEAP" -J"-Xms$JAVA_HEAP" -J-server  -DWHARF.CONFIG=$WHARF_HOME/conf -cp $CLASS_PATH $CLASS
+echo exec $SCALA -J"-Xmx$JAVA_HEAP" -J"-Xms$JAVA_HEAP" -J-server  -DWHARF.CONFIG="$WHARF_HOME/conf" -cp $CLASS_PATH $CLASS
+exec $SCALA -J"-Xmx$JAVA_HEAP" -J"-Xms$JAVA_HEAP" -J-server  -DWHARF.CONFIG="$WHARF_HOME/conf" -cp $CLASS_PATH $CLASS
