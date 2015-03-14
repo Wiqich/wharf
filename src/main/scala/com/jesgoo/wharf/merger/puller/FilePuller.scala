@@ -55,8 +55,14 @@ class FilePuller extends Puller{
   
   def fileMv(evt:Event){
     val mv_filename = cur_path + "/" + cur_name
-    val rename_filename = mv_filename+"."+file_time_name
+    var rename_filename = mv_filename+"."+file_time_name
     val f = new File(mv_filename)
+    var count = 0
+    while(new File(rename_filename).exists()){
+      LOG.info(logger, rename_filename , "had exsit")
+      rename_filename = rename_filename+"."+count
+      count+=1
+    }
     if(f.exists()){
       f.renameTo(new File(rename_filename))
     }else{
@@ -86,11 +92,11 @@ class FilePuller extends Puller{
   
   def stop(){
     closeWriter
-    this.stop()
   }
   
   def run(){
-    while(true){
+    mystatus = true
+    while(mystatus){
       Thread.sleep(period)
     }
   }

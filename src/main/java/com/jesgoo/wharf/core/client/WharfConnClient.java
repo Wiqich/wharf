@@ -39,7 +39,7 @@ public class WharfConnClient {
 		init();
 	}
 	TTransport transport = null;
-	private void init() throws Exception {
+	private void init() throws TException {
 		transport = new TSocket(host,server_port, timeout);
 		TProtocol protocol = new TCompactProtocol(transport);
 		client = new WharfConnService.Client(protocol);
@@ -66,16 +66,10 @@ public class WharfConnClient {
 		}
 	}
 
-	public Response hello(Request req) throws Exception {
+	public Response hello(Request req) throws TException {
 		if (client == null) {
 			this.init();
 		}
-		try {
-			return client.hello(req);
-		} catch (TException e) {
-			close();
-			e.printStackTrace();
-			return null;
-		}
+		return client.hello(req);
 	}
 }

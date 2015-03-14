@@ -20,6 +20,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
 
   val eventIdsM = new EventIdsManager
   val logger = Logger.getLogger(getClass.getName)
+  
   def init() {
     if (wharfDataServer != null) {
       wharfDataServer.close()
@@ -45,6 +46,7 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
     }catch{
       case e:Exception =>
         e.printStackTrace()
+        mystatus = false
     }
   }
 
@@ -76,14 +78,18 @@ class ThriftEventDealer(port: Int) extends Dealer with WharfDataService.Iface {
       eventIdsM.remove(event.getId)
       true
     } else {
+      if(eventIdsM.isHas(event.getId)){
+        true
+      }
       if (!checkMd5(event)) {
         false
       }
       if (!puller.pull(event)) {
         false
+      }else{
+        eventIdsM.putdata(event.getId)
+        true
       }
-      eventIdsM.putdata(event.getId, System.currentTimeMillis())
-      true
     }
   }
 

@@ -1,20 +1,25 @@
 package com.jesgoo.wharf.worker.pusher
 
-import com.jesgoo.wharf.worker.hamal.Hamal
+import org.apache.log4j.Logger
+
 import com.jesgoo.wharf.core.client.WharfDataClient
-import com.jesgoo.wharf.thrift.wharfdata.Event
+import com.jesgoo.wharf.core.config.LOG
 import com.jesgoo.wharf.main.Worker
+import com.jesgoo.wharf.thrift.wharfdata.Event
 import com.jesgoo.wharf.thrift.wharfdata.EventType
 import com.jesgoo.wharf.thrift.wharfdata.Head
-import com.jesgoo.wharf.thrift.wharfdata.Body
-import com.jesgoo.wharf.core.config.LOG
-import org.apache.log4j.Logger
+import com.jesgoo.wharf.worker.hamal.Hamal
 
 class ThriftPusher(port: Int) extends Pusher {
 
   var hamal: Hamal = null
 
   var client: WharfDataClient = null
+  var isRun = false
+
+  val retry_limit = 0
+
+  val fail_count_limit = 3
 
   val pusher_period = Worker.context.THRIFT_PUSHER_PERIOD
   val pusher_host = Worker.context.THRIFT_PUSHER_HOST
@@ -23,7 +28,7 @@ class ThriftPusher(port: Int) extends Pusher {
   def init() {
     client = new WharfDataClient(pusher_host, port, pusher_timeout)
     if (!client.ping()) {
-      LOG.error(logger,"Thrift pusher helloclient ping false and reinit") 
+      LOG.error(logger, "Thrift pusher helloclient ping false and reinit")
       client = null
       client = new WharfDataClient(pusher_host, port, pusher_timeout)
     }
@@ -37,31 +42,23 @@ class ThriftPusher(port: Int) extends Pusher {
     if (client == null) {
       this.init()
     }
-    LOG.debug(logger,"Thrift pusher push event to collector")
-    var result = false
-    try{
-        result = client.push(evt)
-    }catch{
-      case e:Exception =>
-        e.printStackTrace()
-        LOG.debug(logger,"ThriftPusher put event fail")
-        false
-    }
-    if (result) {
-      LOG.debug(logger,"Thrift pusher push event to collector; result = success") 
+    LOG.debug(logger, "Thrift pusher push event to collector")
+
+    if (client.push(evt)) {
+      LOG.debug(logger, "Thrift pusher push event to collector; result = success")
       this.hamal.sendFinish(evt.id)
-      new Thread(new Runnable{
-        def run(){
-           LOG.debug(logger,"Thrift pusher push event to collector success ; report server to delete") 
-           val v = client.push(getDeltedEvent(evt.getId))
-           if(!v){
-              LOG.error(logger,"Thrift pusher push deleteevent to collector fail ; id = ",evt.getId) 
-           }
+      new Thread(new Runnable {
+        def run() {
+          LOG.debug(logger, "Thrift pusher push event to collector success ; report server to delete")
+          val v = client.push(getDeltedEvent(evt.getId))
+          if (!v) {
+            LOG.error(logger, "Thrift pusher push deleteevent to collector fail ; id = ", evt.getId)
+          }
         }
       }).start()
       true
     } else {
-      LOG.error(logger,"Thrift pusher push event to collector; result = fail") 
+      LOG.error(logger, "Thrift pusher push event to collector; result = fail")
       false
     }
   }
@@ -69,26 +66,41 @@ class ThriftPusher(port: Int) extends Pusher {
   def getDeltedEvent(get_id: String): Event = new Event(get_id, new Head(Worker.hostname, EventType.SIGN2))
   def stop() {
     if (client != null) {
+      client.close()
       client = null
     }
+    isRun = false
   }
 
   def run() {
+    mystatus = true
+    isRun = true
+    var fail_count = 0
     var evt = hamal.out()
-    while (true) {
-      if (evt != null) {
-        val is = push(evt)
-        if (is == false) {
-          if (!client.ping()) {
-            client = null
+    while (isRun) {
+      try {
+        if (evt != null) {
+          val is = push(evt)
+          if (is == false) {
+            LOG.warn(logger, "push event server return false")
+          } else {
+            LOG.debug(logger, "Thrift pusher push event to collector success set event = null")
+            evt = null
           }
-        } else {
-          LOG.debug(logger,"Thrift pusher push event to collector success set event = null") 
-          evt = null
         }
-      }
-      if (evt == null) {
-        evt = hamal.out()
+        if (evt == null) {
+          evt = hamal.out()
+        }
+      } catch {
+        case e: Exception =>
+          LOG.error(logger, "Thrift pusher post data error ; failcount=",fail_count) 
+          fail_count += 1
+          if (fail_count > fail_count_limit) {
+            mystatus = false
+            isRun = false
+            LOG.error(logger, "Thrift pusher post data error ; failcount > limits=",fail_count_limit,"now stop this thrift to restart") 
+            client.close
+          }
       }
       Thread.sleep(pusher_period)
     }

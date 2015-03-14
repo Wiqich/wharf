@@ -13,7 +13,7 @@ import com.jesgoo.wharf.thrift.wharfdata.WharfDataService;
 public class WharfDataClient {
 	private int server_port;
 	private String host = "127.0.0.1";
-	private int timeout = 10000;
+	private int timeout = 5000;
 	private WharfDataService.Client client = null;
 
 	public static void main(String[] args) throws TTransportException {
@@ -68,16 +68,10 @@ public class WharfDataClient {
 		client = null;
 	}
 	
-	public boolean push(Event ev) throws TTransportException {
+	public boolean push(Event ev) throws TException {
 		if (client == null) {
 			this.init();
 		}
-		try {
-			return client.push(ev);
-		} catch (TException e) {
-			e.printStackTrace();
-			close();
-			return false;
-		}
+	    return client.push(ev);
 	}
 }

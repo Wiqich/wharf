@@ -20,19 +20,40 @@ class Driver(name:String){
     }
     
     def todo(){
-      new Thread(hamal).start()
+      if(hamal != null){
+        new Thread(hamal).start()
+      }
       Thread.sleep(1000)
-      new Thread(getter).start()
-      new Thread(pusher).start()
+      if(getter != null){
+        new Thread(getter).start()
+      }
+      if(pusher != null){
+        new Thread(pusher).start()
+      }
     }
     
-    def delete(){
+    def delAll(){
+      delGetter
+      delPusher
+      delHamal
+    }
+    
+    def delGetter(){
       if (getter != null)
         getter.stop
-      if(pusher != null){
+    }
+    
+    def delPusher(){
+      if(pusher != null)
         pusher.stop
-       if(hamal != null)
+    }
+    
+    def delHamal(){
+      if(hamal != null)
          hamal.stop
-      }
+    }
+    
+    def getItemName():String = {
+      dName.substring(dName.lastIndexOf("_")+1)
     }
 }

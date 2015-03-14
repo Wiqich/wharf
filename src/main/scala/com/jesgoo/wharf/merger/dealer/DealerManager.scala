@@ -1,22 +1,28 @@
 package com.jesgoo.wharf.merger.dealer
 
 import scala.collection.mutable.HashMap
-import com.jesgoo.wharf.merger.puller.FilePuller
-import com.jesgoo.wharf.core.config.LOG
 import org.apache.log4j.Logger
 
-class DealerManager{
+import com.jesgoo.wharf.core.config.LOG
+import com.jesgoo.wharf.merger.puller.FilePuller
+
+class DealerManager extends Runnable{
    
   val dealers = new HashMap[String,Dealer]
+  
   val logger = Logger.getLogger(getClass.getName)
+  
+  var isRun = false
   def addDealer(key:String,port:Int):Boolean = {
     try{
       val dealer = new ThriftEventDealer(port)
       val pull = new FilePuller()
       dealer.setPuller(pull)
-      new Thread(pull).start()
+      val pull_thd = new Thread(pull)
+      pull_thd.start
       Thread.sleep(1000)
-      new Thread(dealer).start()
+      val dealer_thd = new Thread(dealer)
+      dealer_thd.start
       dealers(key) = dealer
     }catch{
       case ex: Exception => 
@@ -29,8 +35,26 @@ class DealerManager{
   }
   
   def delDealer(key:String){
-    dealers(key).stop()
+    dealers(key).stop
     dealers -= key
     LOG.debug(logger,"DealerManager delete dealer ",key)
+  }
+  
+  def recover(key:String){
+    dealers(key).stop
+    LOG.debug(logger, "stop ",key,"and start a new server")
+    new Thread(dealers(key)).start
+  }
+  
+  def run(){
+    isRun = true
+    while(isRun){
+      for(tmps <- dealers.keySet){
+        if(dealers(tmps).mystatus == false){
+          recover(tmps)
+        }
+      }
+      Thread.sleep(1000)
+    }
   }
 }

@@ -35,4 +35,12 @@ object LOG {
     }
     logger.fatal(str.toString().trim())
   }
+  
+  def warn(logger:Logger,log: Any*) {
+    val str = new StringBuilder
+    for (tmp <- log) {
+      str.append(tmp).append(" ")
+    }
+    logger.warn(str.toString().trim())
+  }
 }

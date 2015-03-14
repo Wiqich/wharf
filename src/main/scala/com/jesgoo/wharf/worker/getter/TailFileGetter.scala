@@ -12,6 +12,8 @@ class TailFileGetter(file : String) extends Getter{
   private var it : Iterator[String] = null
   private val name = file.substring(file.lastIndexOf("/")+1);
   val logger = Logger.getLogger(getClass.getName)
+  
+  var isRun = false
   def setHamal(hamal : Hamal) {
     this.hamal = hamal
   }
@@ -23,32 +25,34 @@ class TailFileGetter(file : String) extends Getter{
     }catch {
       case e:Exception =>
       e.printStackTrace()
-      LOG.error(logger,"TailFileGetter:file ",file,e.getMessage)
+      LOG.warn(logger,"TailFileGetter:file ",file,e.getMessage)
       it = null
     }
     
   }
   def run(){
+    mystatus = true
+    isRun = true
     LOG.debug(logger,"TailFileGetter start with filename ",file)
     init()
-    while(it == null){
-      LOG.error(logger,"TailFileGetter:file not init ok reinit , sleep 10s")
+    while(it == null && isRun){
+      LOG.warn(logger,"TailFileGetter:file not init ok reinit , sleep 2s")
       init()
-      Thread.sleep(5000)
+      Thread.sleep(2000)
     }
     if(it != null){
       var tmpstr =""
-      while(it.hasNext){
+      LOG.info(logger, "tail -F",file,"ing")
+      while(it.hasNext && isRun){
         tmpstr = it.next()
-        //LOG.debug("TailFileGetter: get data is ",tmpstr)
         val data = new Data(tmpstr)
         data.setFilename(name)
-        //LOG.debug("TailFileGetter: put data to Hamal; data = ",data.toString())
         hamal.in(data)
       }
     }
   }
   
   def stop(){
+    isRun = false
   }
 }

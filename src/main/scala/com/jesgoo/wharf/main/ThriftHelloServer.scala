@@ -39,7 +39,7 @@ class ThriftHelloServer(dealerM: DealerManager) extends WharfConnService.Iface w
         port = choosePort
         count +=1
         LOG.info(logger, "choose port this count=",count)
-        Thread.sleep(10000)
+        Thread.sleep(1000)
       }
       var isok = dealerM.addDealer(host_key, port)
       if (!isok) {

@@ -15,7 +15,7 @@ object Merger {
       LOG.info(logger,"start merger......")
       LOG.debug(logger,"Merger set log level to")
       val dealerM = new DealerManager
-      
+      new Thread(dealerM).start()
       val helloServer = new ThriftHelloServer(dealerM)
       helloServer.run()
     }

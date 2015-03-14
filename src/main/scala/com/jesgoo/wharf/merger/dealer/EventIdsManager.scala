@@ -14,7 +14,7 @@ class EventIdsManager extends Runnable{
   val size : Long = Merger.context.EVENT_ID_MANAGER_CLEAR_SIZE
   var isRun = false;
   
-  def putdata(id:String,time:Long) = id_map.put(id, time)
+  def putdata(id:String) = id_map.put(id, System.currentTimeMillis())
     
   def length() : Int = id_map.size
   
@@ -35,6 +35,14 @@ class EventIdsManager extends Runnable{
     for(key <- l){
       id_map.remove(key)
     }
+  }
+  
+  def isHas(key:String) : Boolean = {
+    val ishas = id_map.contains(key)
+    if(ishas){
+       id_map.put(key, System.currentTimeMillis())
+    }
+    ishas
   }
   
   def stop(){
