@@ -27,11 +27,7 @@ class ThriftPusher(port: Int) extends Pusher {
   val logger = Logger.getLogger(getClass.getName)
   def init() {
     client = new WharfDataClient(pusher_host, port, pusher_timeout)
-    if (!client.ping()) {
-      LOG.error(logger, "Thrift pusher helloclient ping false and reinit")
-      client = null
-      client = new WharfDataClient(pusher_host, port, pusher_timeout)
-    }
+    Thread.sleep(1000)
   }
 
   def setHamal(hamal: Hamal) {

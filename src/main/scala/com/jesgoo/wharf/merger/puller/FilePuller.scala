@@ -60,7 +60,7 @@ class FilePuller extends Puller{
     var count = 0
     while(new File(rename_filename).exists()){
       LOG.info(logger, rename_filename , "had exsit")
-      rename_filename = rename_filename+"."+count
+      rename_filename = mv_filename+"."+count
       count+=1
     }
     if(f.exists()){
