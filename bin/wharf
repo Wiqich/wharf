@@ -2,9 +2,9 @@
 cur=`cd $(dirname $0); pwd`
 TYPE=$1
 
-if [ -e "$cur/wharf-env.sh" ]
+if [ -e "$cur/../conf/wharf-env.sh" ]
 then
-    source $cur/wharf-env.sh
+    source $cur/../conf/wharf-env.sh
 fi
 
 if [ "$WHARF_HOME" == "" ]
