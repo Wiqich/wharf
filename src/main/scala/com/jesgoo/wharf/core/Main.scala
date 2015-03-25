@@ -8,34 +8,61 @@ import java.util.concurrent.locks.ReentrantLock
 import java.text.SimpleDateFormat
 import java.util.Date
 import com.jesgoo.wharf.core.config.Utils
+import kafka.message.DefaultCompressionCodec
+import kafka.producer.KeyedMessage
+import kafka.message.NoCompressionCodec
+import scala.util.Properties
+import kafka.producer.Producer
+import kafka.producer.ProducerConfig
+import java.util.Properties
+import java.util.UUID
 
 object Main {
- def main(args:Array[String]){
-      println("hello")
-      for(re <- List("12134","33","yans")){
-        println(re)
-      }
-//      val wci = new WharfConnImpl()
-//      val conn_server = new WharfConnServer(8990)
-//      conn_server.init(wci)
-//      conn_server.run()
-//      println("server has run")
-      val writeLock =  new ReentrantLock();
-      
-       println(mk_file_tail_name(1425567626))
-       
-       val str2 :String = "yangshunbo\n"
-       println(Utils.md5(str2))
-       val id = "sdfsdfsdfsd#123456789#iusdhnfinsdf"
-       println(id.substring(id.indexOf("#") + 1,id.lastIndexOf("#")))
-    }
-    val minuteFormat = new SimpleDateFormat("yyyyMMddHH")
-    def mk_file_tail_name(ts:Long):String={
-       var t = ts
-       if(String.valueOf(t).length() < 13){
-        t = t * 1000
-    }
-    val s = minuteFormat.format(t)
-    s+"0000"
+  
+  val topic: String = "logh" 
+  val brokerList: String ="192.168.2.5:9092"
+  val synchronously: Boolean = true
+  val compress: Boolean = false
+
+  val batchSize: Integer = 200
+  val messageSendMaxRetries: Integer = 3
+  val requestRequiredAcks: Integer = 1
+  
+  val props = new Properties()
+
+  val codec = if(compress) DefaultCompressionCodec.codec else NoCompressionCodec.codec
+  val clientId: String = UUID.randomUUID().toString
+
+  props.put("compression.codec", codec.toString)
+  props.put("producer.type", if(synchronously) "sync" else "async")
+  props.put("metadata.broker.list", brokerList)
+  props.put("batch.num.messages", batchSize.toString)
+  props.put("message.send.max.retries", messageSendMaxRetries.toString)
+  props.put("request.required.acks",requestRequiredAcks.toString)
+  props.put("client.id",clientId.toString)
+
+  val producer = new Producer[AnyRef, AnyRef](new ProducerConfig(props))
+  
+  def kafkaMesssage(message: Array[Byte], partition: Array[Byte]): KeyedMessage[AnyRef, AnyRef] = {
+     if (partition == null) {
+       new KeyedMessage(topic,message)
+     } else {
+       new KeyedMessage(topic,partition,message)
+     }
+  }
+  
+  def send(message: String, partition: String = null): Unit = send(message.getBytes("UTF8"), if (partition == null) null else partition.getBytes("UTF8"))
+
+  def send(message: Array[Byte], partition: Array[Byte]): Unit = {
+    try {
+      producer.send(kafkaMesssage(message, partition))
+    } catch {
+      case e: Exception =>
+        e.printStackTrace
+    }        
+  }
+  
+  def main(args:Array[String]){
+    send("xxxxxxxxxxxxxxxxxxx")
   }
 }

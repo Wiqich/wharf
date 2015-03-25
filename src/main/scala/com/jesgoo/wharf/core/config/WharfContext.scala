@@ -31,6 +31,21 @@ class WharfContext(config:WharfConf) {
   val THRIFT_PUSHER_HOST = config.get("worker.thrift.pusher.host", "127.0.0.1")
   val THRIFT_PUSHER_TIMEOUT = config.getInt("worker.thriftpusher.thrift.timeout", 60000)
   
+  //kafka puller
+  val PULLER_KAFKA_COMPRESS = config.getBoolean("puller.kafka.compress", false)
+  val PULLER_KAFKA_BROKER_LIST = config.get("puller.kafka.broker.list", "127.0.0.1:9092")
+  val PULLER_KAFKA_TOPIC = config.get("puller.kafka.topic", "default")
+  val PULLER_KAFKA_BATCHSIZE = config.getInt("puller.kafka.batch.size",200)
+  val PULLER_KAFKA_SYNC = config.getBoolean("puller.kafka.sync", true)
+  val PULLER_KAFKA_MAXRETRY = config.getInt("puller.kafka.max.retry", 5)
+  val PULLER_KAFKA_REQUEST_ACKS = config.getInt("puller.kafka.request.acks", -1)
+  
+  val PULLER_KAFKA_PERIOD = config.getLong("puller.kafka.run.period", 2000)
+  
+  //
+  val MERGER_PULLER_CLASS =  config.get("merger.puller.class","com.jesgoo.wharf.merger.puller.FilePuller")
+  
+  
   //exit code
   val WORK_LOG_NULL = 1
   val WORK_PING_MERGER_ERROR = 2

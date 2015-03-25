@@ -95,7 +95,9 @@ class ThriftPusher(port: Int) extends Pusher {
             mystatus = false
             isRun = false
             LOG.error(logger, "Thrift pusher post data error ; failcount > limits=",fail_count_limit,"now stop this thrift to restart") 
-            client.close
+            if (client != null) {
+                client.close
+            }
           }
       }
       Thread.sleep(pusher_period)

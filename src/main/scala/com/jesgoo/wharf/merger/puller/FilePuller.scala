@@ -92,11 +92,14 @@ class FilePuller extends Puller{
   
   def stop(){
     closeWriter
+    isrun = false
   }
   
+  var isrun = false 
   def run(){
     mystatus = true
-    while(mystatus){
+    isrun = true
+    while(mystatus && isrun){
       Thread.sleep(period)
     }
   }
