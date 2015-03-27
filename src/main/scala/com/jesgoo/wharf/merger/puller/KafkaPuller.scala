@@ -125,8 +125,7 @@ class KafkaPuller extends Puller {
         } 
         if (p_file.exists()){
           val status_file = new File(path_file)
-          val op_file = new FileWriter(status_file, true)
-          status_writer = new PrintWriter(op_file)
+          status_writer = new PrintWriter(status_file)
         }else{
           LOG.warn(logger, "Puller Kafka data mkdir dir error,path=", path)
         }
@@ -142,7 +141,7 @@ class KafkaPuller extends Puller {
           flush_count = 0
         }
       }
-      if (count > 800000) {
+      if (count > 8000) {
         writer_close
         count = 0
       }
