@@ -113,6 +113,7 @@ class KafkaPuller extends Puller {
   }
   var count: Long = 0
   var status_writer: PrintWriter = null
+  var flush_count = 0
   def store_status(event: Event) {
     try {
       if (status_writer == null) {
@@ -135,8 +136,10 @@ class KafkaPuller extends Puller {
       } else {
         status_writer.append(event.id + "," + count)
         count += 1
-        if (count > Merger.context.PULLER_KAFKA_STATUS_FLUSH_LINES) {
+        flush_count +=1
+        if (flush_count > Merger.context.PULLER_KAFKA_STATUS_FLUSH_LINES) {
           status_writer.flush()
+          flush_count = 0
         }
       }
       if (count > 800000) {
