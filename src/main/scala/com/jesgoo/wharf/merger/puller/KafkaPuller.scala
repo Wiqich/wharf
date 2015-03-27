@@ -117,16 +117,17 @@ class KafkaPuller extends Puller {
     try {
       if (status_writer == null) {
         val path = store_status_path + "/" + event.head.filename
-        val path_file = path + "/"+event.getHead.getHostname+".status"
+        val path_file = path + "/" + event.getHead.getHostname + ".status"
         val p_file = new File(path)
         if (!p_file.exists()) {
-          if (!p_file.mkdirs()) {
-            LOG.warn(logger, "Puller Kafka data mkdir dir error,path=", path)
-          } else {
-            val status_file = new File(path_file)
-            val op_file = new FileWriter(status_file, true)
-            status_writer = new PrintWriter(op_file)
-          }
+          p_file.mkdirs()
+        } 
+        if (p_file.exists()){
+          val status_file = new File(path_file)
+          val op_file = new FileWriter(status_file, true)
+          status_writer = new PrintWriter(op_file)
+        }else{
+          LOG.warn(logger, "Puller Kafka data mkdir dir error,path=", path)
         }
       }
       if (status_writer == null) {
@@ -134,7 +135,7 @@ class KafkaPuller extends Puller {
       } else {
         status_writer.append(event.id + "," + count)
         count += 1
-        if(count > Merger.context.PULLER_KAFKA_STATUS_FLUSH_LINES){
+        if (count > Merger.context.PULLER_KAFKA_STATUS_FLUSH_LINES) {
           status_writer.flush()
         }
       }
