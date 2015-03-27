@@ -134,7 +134,7 @@ class KafkaPuller extends Puller {
       if (status_writer == null) {
         LOG.warn(logger, "Puller Kafka data writer init error")
       } else {
-        status_writer.append(event.id + "," + count)
+        status_writer.append(event.id + "," + count+"\n")
         count += 1
         flush_count +=1
         if (flush_count > Merger.context.PULLER_KAFKA_STATUS_FLUSH_LINES) {
