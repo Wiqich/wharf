@@ -117,7 +117,7 @@ class KafkaPuller extends Puller {
     try {
       if (status_writer == null) {
         val path = store_status_path + "/" + event.head.filename
-        val path_file = path + "/status"
+        val path_file = path + "/"+event.getHead.getHostname+".status"
         val p_file = new File(path)
         if (!p_file.exists()) {
           if (!p_file.mkdirs()) {
@@ -134,6 +134,9 @@ class KafkaPuller extends Puller {
       } else {
         status_writer.append(event.id + "," + count)
         count += 1
+        if(count > Merger.context.PULLER_KAFKA_STATUS_FLUSH_LINES){
+          status_writer.flush()
+        }
       }
       if (count > 800000) {
         writer_close
@@ -147,12 +150,13 @@ class KafkaPuller extends Puller {
   }
 
   def writer_close() {
-    try{
-    if (status_writer != null) {
-      status_writer.close()
-    }
-    }catch{
-      case e:Exception =>
+    try {
+      if (status_writer != null) {
+        status_writer.flush()
+        status_writer.close()
+      }
+    } catch {
+      case e: Exception =>
         e.printStackTrace()
     }
     status_writer = null
