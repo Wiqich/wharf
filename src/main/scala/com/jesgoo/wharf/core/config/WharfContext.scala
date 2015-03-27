@@ -42,6 +42,8 @@ class WharfContext(config:WharfConf) {
   
   val PULLER_KAFKA_PERIOD = config.getLong("puller.kafka.run.period", 2000)
   
+  val PULLER_KAFKA_STATUS_DIR = config.get("puller.kafka.status.dir","/tmp/kafka_puller/status")
+  
   //
   val MERGER_PULLER_CLASS =  config.get("merger.puller.class","com.jesgoo.wharf.merger.puller.FilePuller")
   
