@@ -1,19 +1,22 @@
 package com.jesgoo.wharf.merger.puller
 
+import java.util.List
 import java.util.Properties
 import java.util.UUID
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
+import org.apache.log4j.Logger
+import com.jesgoo.wharf.core.config.LOG
 import com.jesgoo.wharf.main.Merger
+import com.jesgoo.wharf.thrift.wharfdata.Content
 import com.jesgoo.wharf.thrift.wharfdata.Event
 import kafka.message._
 import kafka.producer.KeyedMessage
 import kafka.producer.Producer
 import kafka.producer.ProducerConfig
-import com.jesgoo.wharf.thrift.wharfdata.Content
-import com.jesgoo.wharf.core.config.LOG
-import org.apache.log4j.Logger
-import java.util.List
-import scala.collection.mutable.HashMap
+import java.io.File
+import java.io.PrintWriter
+import java.io.FileWriter
 
 class KafkaPuller extends Puller {
 
@@ -81,6 +84,8 @@ class KafkaPuller extends Puller {
 
   val logger = Logger.getLogger(getClass.getName)
   val evetItems = new HashMap[String, Boolean]
+
+  val store_status_path = Merger.context.PULLER_KAFKA_STATUS_DIR
   def pull(evt: Event): Boolean = {
     if (topic == null) {
       topic = evt.head.filename
@@ -101,9 +106,56 @@ class KafkaPuller extends Puller {
         }
       }
     }
-    LOG.debug(logger, "kafka evetItems size is",evetItems.size)
+    LOG.debug(logger, "kafka evetItems size is", evetItems.size)
+    store_status(evt)
     evetItems.clear()
     true
+  }
+  var count: Long = 0
+  var status_writer: PrintWriter = null
+  def store_status(event: Event) {
+    try {
+      if (status_writer == null) {
+        val path = store_status_path + "/" + event.head.filename
+        val path_file = path + "/status"
+        val p_file = new File(path)
+        if (!p_file.exists()) {
+          if (!p_file.mkdirs()) {
+            LOG.warn(logger, "Puller Kafka data mkdir dir error,path=", path)
+          } else {
+            val status_file = new File(path_file)
+            val op_file = new FileWriter(status_file, true)
+            status_writer = new PrintWriter(op_file)
+          }
+        }
+      }
+      if (status_writer == null) {
+        LOG.warn(logger, "Puller Kafka data writer init error")
+      } else {
+        status_writer.append(event.id + "," + count)
+        count += 1
+      }
+      if (count > 800000) {
+        writer_close
+        count = 0
+      }
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        writer_close
+    }
+  }
+
+  def writer_close() {
+    try{
+    if (status_writer != null) {
+      status_writer.close()
+    }
+    }catch{
+      case e:Exception =>
+        e.printStackTrace()
+    }
+    status_writer = null
   }
 
   def init() {
